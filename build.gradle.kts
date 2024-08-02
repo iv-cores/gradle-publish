@@ -17,14 +17,6 @@ java {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = project.group.toString()
-            artifactId = project.name
-            version = project.version.toString()
-        }
-    }
-
     if(System.getenv("MVN_URL") != null) {
         repositories {
             maven {
