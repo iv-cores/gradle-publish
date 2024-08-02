@@ -53,7 +53,7 @@ tasks.named("publish").configure {
 
 gradlePlugin {
     plugins {
-        create("publish") {
+        create("org.ivcode.gradle.publish") {
             id = "org.ivcode.gradle.publish"
             implementationClass = "org.ivcode.gradle.publish.MvnPublishPlugin"
         }
