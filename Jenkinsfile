@@ -2,7 +2,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
 node {
     checkout scm
-    def isPrimaryBranch = "${script.env.BRANCH_IS_PRIMARY}".equalsIgnoreCase("true")
+    def isPrimaryBranch = "${env.BRANCH_IS_PRIMARY}".equalsIgnoreCase("true")
 
     properties([
         parameters([
