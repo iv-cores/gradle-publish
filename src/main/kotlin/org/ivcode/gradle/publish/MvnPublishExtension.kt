@@ -3,12 +3,13 @@ package org.ivcode.gradle.publish
 import org.gradle.api.Project
 import java.lang.System.getenv
 
+// Environment variables
 private const val ENV_MVN_URL = "MVN_URL"
 private const val ENV_MVN_USERNAME = "MVN_USERNAME"
 private const val ENV_MVN_PASSWORD = "MVN_PASSWORD"
 
 /**
- * Publish
+ * The extension for the publish plugin
  */
 open class PublishExtension {
     /** The url of the maven repository */
@@ -31,12 +32,12 @@ open class PublishExtension {
 }
 
 /**
- * Sets the default values
+ * A helper function to finalize the configuration of the publish extension
  *
  * Environment variables take precedence over the extension properties.
  * Extension properties take precedence over default values
  */
-internal fun PublishExtension.setDefaults(project: Project) {
+internal fun PublishExtension.finalize(project: Project) {
     url         = getenv(ENV_MVN_URL) ?: url
     username    = getenv(ENV_MVN_USERNAME) ?: username
     password    = getenv(ENV_MVN_PASSWORD) ?: password

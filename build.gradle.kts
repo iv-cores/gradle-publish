@@ -17,6 +17,8 @@ java {
 }
 
 publishing {
+    // only define the repository if the url is set
+    // MVN_URL is required, but only when publishing
     if(System.getenv("MVN_URL") != null) {
         repositories {
             maven {
@@ -36,6 +38,7 @@ publishing {
 }
 
 tasks.named("publish").configure {
+    // ensure the url is set before publishing
     doFirst {
         if(System.getenv("MVN_URL") == null) {
             throw IllegalArgumentException("Missing environment variable: MVN_URL")
@@ -50,4 +53,14 @@ gradlePlugin {
             implementationClass = "org.ivcode.gradle.publish.MvnPublishPlugin"
         }
     }
+}
+
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.0")
+
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
