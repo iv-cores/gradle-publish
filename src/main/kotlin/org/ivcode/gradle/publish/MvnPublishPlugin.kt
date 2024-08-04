@@ -43,8 +43,6 @@ class MvnPublishPlugin: Plugin<Project> {
 
         // ensure the url is set before publishing
         tasks.getByName("publish").doFirst {
-            println("Publish Task: ${publishExtension.url}")
-            println("is null: ${publishExtension.url==null}")
             requireNotNull(publishExtension.url) { "maven url must be set" }
         }
 
