@@ -6,7 +6,6 @@ import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.get
 
 /**
  * A gradle plugin for publishing artifacts to maven
@@ -100,41 +99,38 @@ class MvnPublishPlugin: Plugin<Project> {
         project: Project,
         publishExtension: PublishExtension
     ) {
-        if(!shouldCreatePublication(project, publishExtension)) {
-            return
-        }
-
         publications.create("maven", MavenPublication::class.java) {
             groupId = publishExtension.groupId
             artifactId = publishExtension.artifactId
             version = publishExtension.version
 
-            if(project.plugins.hasPlugin("java") || project.plugins.hasPlugin("java-library")) {
-                from(project.components["java"])
+            // Java Projects
+            if(project.tasks.findByName("jar") != null) {
+                if(project.plugins.hasPlugin("java-gradle-plugin")) {
+                    println("The java-gradle-plugin and java publications conflict. The jar artifact will not be published.")
+                } else {
+                    artifact(project.tasks.named("jar").get())
+                }
             }
-            if(project.plugins.hasPlugin("org.springframework.boot")) {
-                artifact(project.tasks.named("bootJar").get())
-            }
-        }
-    }
 
-    /**
-     * Determines if a publication should be created. If the project is using the java-gradle-plugin, then a publication
-     * should not be created.
-     *
-     * @param project The Gradle project to configure.
-     * @param publishExtension The publish extension to use for configuration.
-     * @return True if a publication should be created, false otherwise.
-     */
-    private fun shouldCreatePublication(project: Project, publishExtension: PublishExtension): Boolean {
-        return if (project.plugins.hasPlugin("java-gradle-plugin")) {
-            require(publishExtension.groupId == null && publishExtension.artifactId == null && publishExtension.version == null
-            ) {
-                "Cannot specify groupId, artifactId, or version if using java-gradle-plugin"
+            // Source Code
+            if(project.tasks.findByName("sourcesJar") != null) {
+                artifact(project.tasks.named("sourcesJar").get())
             }
-            false
-        } else {
-            true
+
+            // Javadocs
+            if (project.tasks.findByName("javadocJar") != null) {
+                artifact(project.tasks.named("javadocJar").get())
+            }
+
+            // Spring Boot Projects.
+            if(project.plugins.hasPlugin("org.springframework.boot") && project.tasks.findByName("bootJar") != null) {
+                if(!project.plugins.hasPlugin("java-gradle-plugin")) {
+                    println("The java-gradle-plugin and spring-boot publications conflict. The bootJar artifact will not be published.")
+                } else {
+                    artifact(project.tasks.named("bootJar").get())
+                }
+            }
         }
     }
 }

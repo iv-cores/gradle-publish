@@ -17,6 +17,17 @@ java {
 }
 
 publishing {
+
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = project.group.toString()
+            artifactId = rootProject.name
+            version = project.version.toString()
+
+            artifact(tasks.named("sourcesJar").get())
+        }
+    }
+
     // only define the repository if the url is set
     // MVN_URL is required, but only when publishing
     if(System.getenv("MVN_URL") != null) {
