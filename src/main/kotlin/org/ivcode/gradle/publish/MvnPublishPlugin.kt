@@ -104,11 +104,7 @@ class MvnPublishPlugin: Plugin<Project> {
 
             // Java Projects
             if(project.tasks.findByName("jar") != null) {
-                if(project.plugins.hasPlugin("java-gradle-plugin")) {
-                    println("The java-gradle-plugin and java publications conflict. The jar artifact will not be published.")
-                } else {
-                    artifact(project.tasks.named("jar").get())
-                }
+                artifact(project.tasks.named("jar").get())
             }
 
             // Source Code
@@ -123,11 +119,7 @@ class MvnPublishPlugin: Plugin<Project> {
 
             // Spring Boot Projects.
             if(project.plugins.hasPlugin("org.springframework.boot") && project.tasks.findByName("bootJar") != null) {
-                if(!project.plugins.hasPlugin("java-gradle-plugin")) {
-                    println("The java-gradle-plugin and spring-boot publications conflict. The bootJar artifact will not be published.")
-                } else {
-                    artifact(project.tasks.named("bootJar").get())
-                }
+                artifact(project.tasks.named("bootJar").get())
             }
         }
     }
