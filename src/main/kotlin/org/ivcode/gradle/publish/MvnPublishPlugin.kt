@@ -2,10 +2,11 @@ package org.ivcode.gradle.publish
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.credentials.PasswordCredentials
+import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.get
 
 /**
  * A gradle plugin for publishing artifacts to maven
@@ -24,9 +25,9 @@ class MvnPublishPlugin: Plugin<Project> {
      */
     private fun setupAfterEvaluate(project: Project) = project.afterEvaluate {
         val publishExtension = project.extensions.getByName("publish") as PublishExtension
-        publishExtension.finalize(project)
+        val copy = publishExtension.finalize(project)
 
-        setupMavenPublish(project, publishExtension)
+        setupMavenPublish(project, copy)
     }
 
     /**
@@ -39,8 +40,12 @@ class MvnPublishPlugin: Plugin<Project> {
         // apply the maven-publish plugin
         plugins.apply("maven-publish")
 
+        println("Register Publish Task")
+
         // ensure the url is set before publishing
         tasks.getByName("publish").doFirst {
+            println("Publish Task: ${publishExtension.url}")
+            println("is null: ${publishExtension.url==null}")
             requireNotNull(publishExtension.url) { "maven url must be set" }
         }
 
@@ -71,6 +76,7 @@ class MvnPublishPlugin: Plugin<Project> {
         repositories {
             maven {
                 url = uri(publishExtension.url!!)
+                isAllowInsecureProtocol = publishExtension.isAllowInsecureProtocol ?: false
 
                 if(publishExtension.username != null && publishExtension.password != null) {
                     credentials(PasswordCredentials::class.java) {
@@ -103,7 +109,12 @@ class MvnPublishPlugin: Plugin<Project> {
             artifactId = publishExtension.artifactId
             version = publishExtension.version
 
-            from(project.components.getByName("java"))
+            if(project.plugins.hasPlugin("java") || project.plugins.hasPlugin("java-library")) {
+                from(project.components["java"])
+            }
+            if(project.plugins.hasPlugin("org.springframework.boot")) {
+                artifact(project.tasks.named("bootJar").get())
+            }
         }
     }
 
@@ -117,7 +128,8 @@ class MvnPublishPlugin: Plugin<Project> {
      */
     private fun shouldCreatePublication(project: Project, publishExtension: PublishExtension): Boolean {
         return if (project.plugins.hasPlugin("java-gradle-plugin")) {
-            require(publishExtension.groupId == null && publishExtension.artifactId == null && publishExtension.version == null) {
+            require(publishExtension.groupId == null && publishExtension.artifactId == null && publishExtension.version == null
+            ) {
                 "Cannot specify groupId, artifactId, or version if using java-gradle-plugin"
             }
             false

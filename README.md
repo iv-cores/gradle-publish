@@ -11,6 +11,13 @@ plugins {
 }
 ```
 
+## Supported Plugins
+The plugin will identify the following plugins and configure the `maven-publish` plugin accordingly.
+- `java`
+- `java-library`
+- `java-gradle-plugin`
+- `org.springframework.boot`
+
 ## Configuration
 The extension can be used to configure the plugin. Typically, you wouldn't specify the `url`, `username`, or `password`.
 This could be configured using environment variables. And if the defaults are to be used for the `groupId`,
@@ -24,6 +31,7 @@ publish {
     url      = "https://my-mvn.com" // Repo URL        | Required for non-local publishing
     username = "my-username"        // Repo Username   | Optional (default = none)
     password = "my-password"        // Repo Password   | Optional (default = none)
+    isAllowInsecure = true          // Allow Insecure  | Optional (default = false)
 
     groupId    = "com.my-group-id"  // Mvn Group Id    | Optional (default = ${project.group})
     artifactId = "my-project-name"  // Mvn Artifact Id | Optional (default = ${project.name})
