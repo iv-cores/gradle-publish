@@ -39,8 +39,6 @@ class MvnPublishPlugin: Plugin<Project> {
         // apply the maven-publish plugin
         plugins.apply("maven-publish")
 
-        println("Register Publish Task")
-
         // ensure the url is set before publishing
         tasks.getByName("publish").doFirst {
             requireNotNull(publishExtension.url) { "maven url must be set" }
@@ -97,6 +95,15 @@ class MvnPublishPlugin: Plugin<Project> {
         project: Project,
         publishExtension: PublishExtension
     ) {
+        if(!isCreatePublication(project)) {
+            publishExtension.run {
+                if (groupId != null || artifactId != null || version != null) {
+                    project.logger.warn("A conflicting publication has been identified. Ignoring groupId, artifactId, and version.")
+                }
+            }
+            return
+        }
+
         publications.create("maven", MavenPublication::class.java) {
             groupId = publishExtension.groupId
             artifactId = publishExtension.artifactId
@@ -122,5 +129,14 @@ class MvnPublishPlugin: Plugin<Project> {
                 artifact(project.tasks.named("bootJar").get())
             }
         }
+    }
+
+    private fun isCreatePublication(project: Project): Boolean {
+        if(project.plugins.hasPlugin("java-gradle-plugin")) {
+            project.logger.debug("The java-gradle-plugin sets its own publication. Skipping.")
+            return false
+        }
+
+        return true
     }
 }
